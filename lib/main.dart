@@ -1,116 +1,596 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(CalculatorApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
+class CalculatorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      home: Scaffold(
+        body: Calculator(),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
+class Calculator extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _CalculatorState createState() => _CalculatorState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _CalculatorState extends State<Calculator> {
+  String displayText = '0';
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  static const addSign = "\u002B";
+  static const subtractSign = "\u2212";
+  static const multiplySign = "\u00D7";
+  static const divideSign = "\u00F7";
+  static const equalSign = "\u003D";
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+    return Container(
+      color: Colors.grey[200],
+      padding: EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 8.0),
+            padding: EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(width: 0.0, color: Colors.white),
+              borderRadius: BorderRadius.circular(0.0),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            alignment: Alignment.bottomRight,
+            child: Text(
+              displayText,
+              style: TextStyle(fontSize: 34.0),
             ),
-          ],
-        ),
+          ),
+          buildButtonRow(['C', '⌫']),
+          buildButtonRow(['7', '8', '9', divideSign]),
+          buildButtonRow(['4', '5', '6', multiplySign]),
+          buildButtonRow(['1', '2', '3', subtractSign]),
+          buildButtonRow(['0', '+',addSign]),
+          buildButtonRow([equalSign]),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  Widget buildButtonRow(List<String> buttons) {
+    return Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: buttons
+            .map(
+              (button) => buildButton(
+                button,
+                isOperator(button) ? Colors.orange : Colors.white,
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  Widget buildButton(String text, Color color) {
+    return ElevatedButton(
+      onPressed: () => onButtonPressed(text),
+      style: ElevatedButton.styleFrom(
+        primary: color,
+        padding: EdgeInsets.all(20.0),
+        textStyle: TextStyle(fontSize: 20.0),
+      ),
+      child: Text(text),
+    );
+  }
+
+  bool isOperator(String text) {
+    return text == addSign ||
+        text == subtractSign ||
+        text == multiplySign ||
+        text == divideSign ||
+        text == equalSign;
+  }
+
+  void onButtonPressed(String buttonText) {
+    setState(() {
+      switch (buttonText) {
+        case 'C':
+          displayText = '0';
+          break;
+        case '⌫':
+          if (displayText.length > 1) {
+            displayText = displayText.substring(0, displayText.length - 1);
+          } else {
+            displayText = '0';
+          }
+          break;
+        case '=':
+          // Handle equal button press (perform calculation if needed)
+          break;
+        default:
+          if (displayText == '0' || isOperator(displayText)) {
+            displayText = buttonText;
+          } else {
+            displayText += buttonText;
+          }
+      }
+    });
+  }
 }
+// import 'package:flutter/material.dart';
+
+// void main() {
+//   runApp(CalculatorApp());
+// }
+
+// class CalculatorApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: Scaffold(
+//         body: Calculator(),
+//       ),
+//     );
+//   }
+// }
+
+// class Calculator extends StatefulWidget {
+//   @override
+//   _CalculatorState createState() => _CalculatorState();
+// }
+
+// class _CalculatorState extends State<Calculator> {
+//   String displayText = '0';
+
+//   static const addSign = "\u002B";
+//   static const subtractSign = "\u2212";
+//   static const multiplySign = "\u00D7";
+//   static const divideSign = "\u00F7";
+//   static const equalSign = "\u003D";
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       color: Colors.grey[200],
+//       padding: EdgeInsets.all(8.0),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.stretch,
+//         children: [
+//           Container(
+//             margin: EdgeInsets.symmetric(vertical: 8.0),
+//             padding: EdgeInsets.all(16.0),
+//             decoration: BoxDecoration(
+//               color: Colors.white,
+//               border: Border.all(width: 0.0, color: Colors.white),
+//               borderRadius: BorderRadius.circular(0.0),
+//             ),
+//             alignment: Alignment.bottomRight,
+//             child: Text(
+//               displayText,
+//               style: TextStyle(fontSize: 24.0),
+//             ),
+//           ),
+//         //    SizedBox(width: 16.0), //ความชิดกันระหว่างบล้อกต่อบล้อก
+//         //     SizedBox.square(
+//         //       child: Container(
+//         //         width: 65.0,
+//         //         height: 65.0,
+//         //         decoration: BoxDecoration(
+//         //           color: Colors.white,
+//         //           border: Border.all(width: 0.7, color: Colors.grey),
+//         //         ),
+//         //         child: TextButton(
+//         //           onPressed: () => addPin('6'),
+//         //           child: Column(
+//         //             mainAxisAlignment: MainAxisAlignment.center,
+//         //             children: [
+//         //               Text(
+//         //                 '6',
+//         //                 style: TextStyle(
+//         //                     fontSize: 20.0,
+//         //                     fontWeight: FontWeight.bold,
+//         //                     color: Colors.black),
+//         //               ),
+//         //               // Text(
+//         //               //   'six',
+//         //               //   style: TextStyle(fontSize: 12.0, color: Colors.black),
+//         //               // )
+//         //             ],
+//         //           ),
+//         //         ),
+//         //       ),
+//         //     ),
+//         //   ],
+//         // ),
+//           SizedBox(height: 65.0),
+//           SizedBox(width: 40.0),
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: ['7', '8', '9', divideSign]
+//                 .map((button) => buildButton(
+//                       button,
+//                       isOperator(button) ? Colors.orange : Colors.white,
+//                     ))
+//                 .toList(),
+//           ),
+//           SizedBox(height: 65.0),
+//           SizedBox(width: 40.0),
+//           //SizedBox(width: 15.0),
+//           //SizedBox(height: 35.0),
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: ['4', '5', '6', multiplySign]
+//                 .map((button) => buildButton(
+//                       button,
+//                       isOperator(button) ? Colors.orange : Colors.white,
+//                     ))
+//                 .toList(),
+//           ),
+//           SizedBox(height: 65.0),
+//           SizedBox(width: 40.0),
+//           //SizedBox(width: 15.0),
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: ['1', '2', '3', subtractSign]
+//                 .map((button) => buildButton(
+//                       button,
+//                       isOperator(button) ? Colors.orange : Colors.white,
+//                     ))
+//                 .toList(),
+//           ),
+//           SizedBox(height: 65.0),
+//           SizedBox(width: 40.0),
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: ['0',addSign]
+//                 .map((button) => buildButton(
+//                       button,
+//                       isOperator(button) ? Colors.orange : Colors.white,
+//                     ))
+//                 .toList(),
+//           ),
+//         //   SizedBox(width: 16.0), //ความชิดกันระหว่างบล้อกต่อบล้อก
+//         //     SizedBox.square(
+//         //       child: Container(
+//         //         width: 65.0,
+//         //         height: 65.0,
+//         //         decoration: BoxDecoration(
+//         //           color: Colors.white,
+//         //           border: Border.all(width: 0.7, color: Colors.grey),
+//         //         ),
+//         //       ),
+//         //     ),
+//         // ],
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//             children: [equalSign]
+//                 .map((button) => buildButton(
+//                       button,
+//                       isOperator(button) ? Colors.orange : Colors.white,
+//                     ))
+//                 .toList(),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+//   //         buildButtonRow(['C', '⌫']),
+//   //         buildButtonRow(['7', '8', '9', divideSign]),
+//   //         buildButtonRow(['4', '5', '6', multiplySign]),
+//   //         buildButtonRow(['1', '2', '3', subtractSign]),
+//   //         buildButtonRow(['0',addSign]),
+//   //         buildButtonRow([equalSign]),
+//   //       ],
+//   //     ),
+//   //   );
+//   // }
+
+//   Widget buildButtonRow(List<String> buttons) {
+//     return Expanded(
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//         children: buttons
+//             .map(
+//               (button) => buildButton(
+//                 button,
+//                 isOperator(button) ? Colors.orange : Colors.white,
+//               ),
+//             )
+//             .toList(),
+//       ),
+//     );
+//   }
+
+//   Widget buildButton(String text, Color color) {
+//     return ElevatedButton(
+//       onPressed: () => onButtonPressed(text),
+//       style: ElevatedButton.styleFrom(
+//         primary: color,
+//         padding: EdgeInsets.all(20.0),
+//         textStyle: TextStyle(fontSize: 20.0),
+//       ),
+//       child: Text(text),
+//     );
+//   }
+
+//   bool isOperator(String text) {
+//     return text == addSign ||
+//         text == subtractSign ||
+//         text == multiplySign ||
+//         text == divideSign ||
+//         text == equalSign;
+//   }
+
+//   void onButtonPressed(String buttonText) {
+//     setState(() {
+//       switch (buttonText) {
+//         case 'C':
+//           displayText = '0';
+//           break;
+//         case '⌫':
+//           if (displayText.length > 1) {
+//             displayText = displayText.substring(0, displayText.length - 1);
+//           } else {
+//             displayText = '0';
+//           }
+//           break;
+//         case '=':
+//           // Handle equal button press (perform calculation if needed)
+//           break;
+//         default:
+//           if (displayText == '0' || isOperator(displayText)) {
+//             displayText = buttonText;
+//           } else {
+//             displayText += buttonText;
+//           }
+//       }
+//     });
+//   }
+// } //อันเก่า
+
+
+// import 'package:flutter/material.dart';
+
+// void main() {
+//   runApp(CalculatorApp());
+// }
+
+// class CalculatorApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: Scaffold(
+//         body: Calculator(),
+//       ),
+//     );
+//   }
+// }
+
+// class Calculator extends StatefulWidget {
+//   @override
+//   _CalculatorState createState() => _CalculatorState();
+// }
+
+// class _CalculatorState extends State<Calculator> {
+//   String displayText = '0';
+
+//   static const addSign = "\u002B";
+//   static const subtractSign = "\u2212";
+//   static const multiplySign = "\u00D7";
+//   static const divideSign = "\u00F7";
+//   static const equalSign = "\u003D";
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return LayoutBuilder(
+//       builder: (context, constraints) {
+//         return Container(
+//           color: Colors.grey[200],
+//       padding: EdgeInsets.all(8.0),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.stretch,
+//         children: [
+//           Container(
+//             margin: EdgeInsets.symmetric(vertical: 8.0),
+//             padding: EdgeInsets.all(16.0),
+//             decoration: BoxDecoration(
+//               color: Colors.white,
+//               border: Border.all(width: 0.0, color: Colors.white),
+//               borderRadius: BorderRadius.circular(0.0),
+//             ),
+//             alignment: Alignment.bottomRight,
+//             child: Text(
+//               displayText,
+//               style: TextStyle(fontSize: 24.0),
+//             ),
+//           ),
+//           // color: Colors.grey[200],
+//           // padding: EdgeInsets.all(8.0),
+//           // child: Column(
+//           //   crossAxisAlignment: CrossAxisAlignment.stretch,
+//           //   children: <Widget>[
+//           //     Text(
+//           //       displayText.padRight(6, '_'),
+//           //       style: TextStyle(fontSize: 20.0, color: Colors.black54),
+//           //     ),
+//           //     SizedBox(height: 100.0),
+//           //     Row(
+//           //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//           //       children: [equalSign]
+//           //           .map((button) => buildButton(
+//           //                 button,
+//           //                 isOperator(button) ? Colors.orange : Colors.white,
+//           //               ))
+//           //           .toList(),
+//           //     ),
+//           SizedBox(width: 16.0), //ความชิดกันระหว่างบล้อกต่อบล้อก
+//             SizedBox.square(
+//               child: Container(
+//                 width: 65.0,
+//                 height: 65.0,
+//                 decoration: BoxDecoration(
+//                   color: Colors.white,
+//                   border: Border.all(width: 0.7, color: Colors.grey),
+//                 ),
+//                 child: TextButton(
+//                   //onPressed: () => displayText('6'),
+//                   child: Column(
+//                     mainAxisAlignment: MainAxisAlignment.center,
+//                     children: [
+//                       chil: ['C', '⌫']
+//                     .map((button) => buildButton(
+//                           button,
+//                           isOperator(button) ? Colors.orange : Colors.white,
+//                         ))
+//                     .toList(),
+//                       // Text(
+//                       //   'six',
+//                       //   style: TextStyle(fontSize: 12.0, color: Colors.black),
+//                       // )
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//               // SizedBox(height: 100.0),
+//               // Row(
+//               //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//               //   children: ['C', '⌫']
+//               //       .map((button) => buildButton(
+//               //             button,
+//               //             isOperator(button) ? Colors.orange : Colors.white,
+//               //           ))
+//               //       .toList(),
+//               // ),
+//               SizedBox(height: 100.0),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                 children: ['7', '8', '9', divideSign]
+//                     .map((button) => buildButton(
+//                           button,
+//                           isOperator(button) ? Colors.orange : Colors.white,
+//                         ))
+//                     .toList(),
+//               ),
+//               SizedBox(height: 100.0),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                 children: ['4', '5', '6', multiplySign]
+//                     .map((button) => buildButton(
+//                           button,
+//                           isOperator(button) ? Colors.orange : Colors.white,
+//                         ))
+//                     .toList(),
+//               ),
+//               SizedBox(height: constraints.maxHeight * 0.1),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                 children: ['1', '2', '3', subtractSign]
+//                     .map((button) => buildButton(
+//                           button,
+//                           isOperator(button) ? Colors.orange : Colors.white,
+//                         ))
+//                     .toList(),
+//               ),
+//               SizedBox(height: 100.0),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                 children: ['0', '+', addSign]
+//                     .map((button) => buildButton(
+//                           button,
+//                           isOperator(button) ? Colors.orange : Colors.white,
+//                         ))
+//                     .toList(),
+//               ),
+//               SizedBox(height: 100.0),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                 children: [equalSign]
+//                     .map((button) => buildButton(
+//                           button,
+//                           isOperator(button) ? Colors.orange : Colors.white,
+//                         ))
+//                     .toList(),
+//               ),
+//             ],
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   void adddisplayText(String buttonText) {
+//     setState(() {
+//       if (displayText == '0') {
+//         displayText = buttonText;
+//       } else {
+//         displayText += buttonText;
+//       }
+//     });
+//   }
+
+//   void onButtonPressed(String buttonText) {
+//     setState(() {
+//       switch (buttonText) {
+//         case 'C':
+//           displayText = '0';
+//           break;
+//         case '⌫':
+//           if (displayText.length > 1) {
+//             displayText = displayText.substring(0, displayText.length - 1);
+//           } else {
+//             displayText = '0';
+//           }
+//           break;
+//         case '=':
+//           // Handle equal button press (perform calculation if needed)
+//           break;
+//         default:
+//           if (displayText == '0' || isOperator(displayText)) {
+//             displayText = buttonText;
+//           } else {
+//             displayText += buttonText;
+//           }
+//       }
+//     });
+//   }
+
+//   Widget buildButton(String text, Color color) {
+//     return Container(
+//       margin: EdgeInsets.all(8.0),
+//       decoration: BoxDecoration(
+//         color: color,
+//         border: Border.all(width: 0.7, color: Colors.grey),
+//         borderRadius: BorderRadius.circular(8.0),
+//       ),
+//       child: InkWell(
+//         onTap: () {
+//           if (!isOperator(text)) {
+//             adddisplayText(text);
+//           }
+//           onButtonPressed(text);
+//         },
+//         child: Center(
+//           child: Text(
+//             text,
+//             style: TextStyle(fontSize: 20.0),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   bool isOperator(String text) {
+//     return text == addSign ||
+//         text == subtractSign ||
+//         text == multiplySign ||
+//         text == divideSign ||
+//         text == equalSign;
+//   }
+// }
